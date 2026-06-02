@@ -1,43 +1,45 @@
 #!/bin/bash
 
-echo "====================================="
-echo " Statlight Game Engine Builder"
-echo "====================================="
+set -e
+
+echo "===================================="
+echo " Statlight Game Engine - macOS Build"
+echo "===================================="
 
 # Verifica Python
-if ! command -v python3 &> /dev/null
-then
-    echo "Python 3 não encontrado!"
-    read -p "Pressione Enter para sair..."
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "Erro: Python 3 não encontrado."
     exit 1
 fi
 
-# Instala PyInstaller se necessário
-python3 -m pip install --upgrade pyinstaller
+echo "Instalando dependências..."
+python3 -m pip install --upgrade pip
+python3 -m pip install pyinstaller
 
-# Limpa builds antigos
-rm -rf build
-rm -rf dist
-rm -rf __pycache__
+echo "Limpando builds antigos..."
+rm -rf build dist *.spec
 
-# Gera o executável
-pyinstaller \
-    --windowed \
-    --name StatlightGameEngine \
-    --add-data "assets:assets" \
-    main.py
+echo "Gerando .app..."
 
-BUILD_RESULT=$?
-
-echo ""
-
-if [ $BUILD_RESULT -eq 0 ]; then
-    echo "Build concluído com sucesso!"
-    echo "Arquivos gerados em:"
-    echo "dist/StatlightGameEngine"
+if [ -f "assets/icon.icns" ]; then
+    pyinstaller \
+        --windowed \
+        --onedir \
+        --name "StatlightGameEngine" \
+        --icon "assets/icon.icns" \
+        main.py
 else
-    echo "Erro durante o build!"
+    pyinstaller \
+        --windowed \
+        --onedir \
+        --name "StatlightGameEngine" \
+        main.py
 fi
 
 echo ""
-read -p "Pressione Enter para fechar..."
+echo "✅ Build concluído!"
+echo "Aplicativo criado em:"
+echo "dist/StatlightGameEngine.app"
+echo ""
+
+read -p "Pressione Enter para sair..."
